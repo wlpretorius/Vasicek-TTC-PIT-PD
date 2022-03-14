@@ -5,3 +5,6 @@ This project provides a framework to convert TTC PDs to PIT PDs using the Vasice
 ## Resources
 https://www.bcu.gub.uy/Comunicaciones/Jornadas%20de%20Economa/Guillermo_Magnou.pdf
 https://mpra.ub.uni-muenchen.de/59025/1/MPRA_paper_59025.pdf
+
+## Special Mentions To:
+Gary van Vuuren
