@@ -22,16 +22,13 @@ import os
 
 # Setting up streamlit design and tabs
 st.set_page_config(layout='wide', initial_sidebar_state="expanded")
-# sidebarimage = Image.open("C:\\Users\\Admin\\Desktop\\Riskworx\\Riskworx Wordmark Blue.png") 
-# st.sidebar.image(sidebarimage, width=250)
 df = st.sidebar.file_uploader('Upload your CSV file here:', type='csv')
 st.sidebar.header('Navigation')
 tabs = ["About", "Data Preview and Analysis", "Single Factor Model Optimization", "Transition"]
 page = st.sidebar.radio("Vasicek one-factor PD Transition Model", tabs)
 
 if page == "About":
-    image = Image.open(r"C:\Users\wlpre\OneDrive\Desktop\Python\Projects\Vasicek_TTC_PIT_PD\Vasicek_TTC_PIT_PD\ttcpdtopitpd.jpg")
-    # icon = Image.open("C:\\Users\\Admin\\Desktop\\Riskworx\\RWx & Slogan.png")
+    image = Image.open("ttcpdtopitpd.jpg")
     st.image(image, width=700)
     st.header("About")
     st.write("This interface is designed for a quick implementation to transform TTC PDs to PIT PDs using the Vasicek one-factor model.")
@@ -41,7 +38,7 @@ if page == "About":
         bin_str = base64.b64encode(data).decode()
         href = f'<a href="data:application/octet-stream;base64,{bin_str}" download="{os.path.basename(bin_file)}">Download {file_label}</a>'
         return href
-    st.markdown(get_binary_file_downloader_html(r"C:\Users\wlpre\OneDrive\Desktop\Python\Projects\Vasicek_TTC_PIT_PD\Vasicek_TTC_PIT_PD\Yang.pdf", 'Paper on the model'), unsafe_allow_html=True)
+    st.markdown(get_binary_file_downloader_html("Yang.pdf", 'Paper on the model'), unsafe_allow_html=True)
     st.header("Requirements")
     st.write("TTC PDs and one-factor macroeconomic variable such as GDP.")         
     st.header("How to use")  
