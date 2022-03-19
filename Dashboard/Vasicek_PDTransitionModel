@@ -1,0 +1,110 @@
+# Importing libraries
+from cmath import sqrt
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from datetime import datetime as dt
+from sklearn.linear_model import LinearRegression
+from scipy.stats import norm
+from statistics import NormalDist
+import math
+
+# Data importing and information
+Mev_TTCPd_data = pd.read_csv(r"C:\Users\wlpre\OneDrive\Desktop\Vasicek-TTC-PIT-PD\Vasicek-TTC-PIT-PD\Data.csv", usecols=["Year", "F1","TTC PDs"], sep=',', parse_dates = True)
+df = pd.DataFrame(Mev_TTCPd_data)
+df["F1"] = df["F1"].astype(float)
+df["TTC PDs"] = df["TTC PDs"].astype(float)
+df["Year"] = pd.to_datetime(df["Year"].astype(str), format='%Y')
+df['Year'] = df['Year'].dt.strftime('%Y-%m')
+df.info()
+df.head()
+df.plot()
+plt.show()
+
+# Calculating the mean and std of the macroeconomic variable
+mu_F1 = df["F1"].mean()
+print(mu_F1)
+sigma_F1 = df["F1"].std()
+print(mu_F1)
+      
+# Calculating the mean and std of the TTC PDs     
+mu_TTCPd = df["TTC PDs"].mean()
+print(mu_TTCPd)
+sigma_TTCPd = df["TTC PDs"].std()
+print(sigma_TTCPd)
+
+# Standardizing the macro economic variable and the TTC PD
+std_F1 = df["F1"].sub(df["F1"].mean(0), axis=0).div(df["F1"].std(0), axis=0)
+std_TTCPd = df["TTC PDs"].sub(df["TTC PDs"].mean(0), axis=0).div(df["TTC PDs"].std(0), axis=0)
+standardized_df = {'F1': std_F1, 'TTC PDs': std_TTCPd}
+standardized_df = pd.DataFrame(standardized_df)
+print(standardized_df.head())
+
+# Linear regression for the Vasicek Model to get regressed PDs
+X = std_F1.values.reshape(-1, 1)  # values converts it into a numpy array
+Y = std_TTCPd.values.reshape(-1, 1)  # -1 means that calculate the dimension of rows, but have 1 column
+linear_regressor = LinearRegression() # create object for the class
+linear_regressor.fit(X, Y)  # perform linear regression
+std_TTCPd_pred = linear_regressor.predict(X)  # make predictions
+std_TTCPd_pred
+plt.scatter(X, Y)
+plt.plot(X, std_TTCPd_pred, color='red')
+plt.show()
+linear_regressor.coef_[0]
+
+# Standardizing TTC PDs again
+std_TTCPd_pred = pd.DataFrame(std_TTCPd_pred, columns=['Std pred PDs'])
+std_TTCPd_pred.head()
+std_TTCPd_pred_std = std_TTCPd_pred['Std pred PDs'].sub(std_TTCPd_pred['Std pred PDs'].mean(0), axis=0).div(std_TTCPd_pred['Std pred PDs'].std(0), axis=0)
+std_TTCPd_pred_std
+
+# Vasicek Fit
+beta = -0.1852443573
+beta = linear_regressor.coef_[0]
+
+def Vasicek_fit(beta, std_TTCPd_pred_std):
+    """
+    This function returns the Vasicek Fit using the standardised TTC Pds
+    and the mean of the TTC PDs for each year provided. 
+    """
+    vasicek_fit = []
+    ppf = []
+    i = 0
+    for i in range(0, len(std_TTCPd_pred_std)):
+        norm_inv = NormalDist().inv_cdf(mu_TTCPd)
+        ppf.append(norm_inv - (beta * std_TTCPd_pred_std[i]) / np.sqrt(1 - beta ** 2))
+        vasicek_fit.append(norm.cdf(ppf[i]))
+    
+    return np.array(vasicek_fit).ravel()
+
+
+Vasicek_fit(beta = -0.1852443573, std_TTCPd_pred_std = std_TTCPd_pred_std)
+vasicek_fit = Vasicek_fit(beta= -0.1852443573, std_TTCPd_pred_std = std_TTCPd_pred_std)
+vasicek_fit
+
+original_TTC_PDs = df["TTC PDs"].values.flatten()
+original_TTC_PDs
+sum(vasicek_fit - original_TTC_PDs) ** 2
+
+# We need to think of a non-linear minimzation function for beta
+from scipy.stats import linregress
+import matplotlib.pyplot as plt
+# Data
+x = original_TTC_PDs
+y = vasicek_fit
+# Method 1: scipy linregress
+slope,intercept,r,p_value,std_err = linregress(x,y)
+a = [slope,intercept]
+print(slope)
+print('R^2 linregress = '+str(r**2))
+
+############################################################################
+data = {'Year': ['1', '2', '3'], 'F1_Forecast': [0.03, -0.1, 0.1]}
+F1_Forecast = pd.DataFrame(data)
+F1_Forecast["F1_Forecast"] = F1_Forecast["F1_Forecast"].astype(float)
+
+# Standardising the forecasted values
+F1_Forecast['Std_forecasted_F1'] = (F1_Forecast["F1_Forecast"] - mu_F1) / sigma_F1
+
+beta_sum_alpha_X = beta * alpha * F1_Forecast['Std_forecasted_F1'][2]
+adjusted_beta = np.sqrt(1 - beta ** 2)
