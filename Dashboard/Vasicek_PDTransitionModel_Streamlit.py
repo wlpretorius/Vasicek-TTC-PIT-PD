@@ -38,7 +38,7 @@ if page == "About":
         bin_str = base64.b64encode(data).decode()
         href = f'<a href="data:application/octet-stream;base64,{bin_str}" download="{os.path.basename(bin_file)}">Download {file_label}</a>'
         return href
-    st.markdown(get_binary_file_downloader_html("Yang.pdf", 'Paper on the model'), unsafe_allow_html=True)
+    st.markdown(get_binary_file_downloader_html("Dashboard/Yang.pdf", 'Paper on the model'), unsafe_allow_html=True)
     st.header("Requirements")
     st.write("TTC PDs and one-factor macroeconomic variable such as GDP.")         
     st.header("How to use")  
