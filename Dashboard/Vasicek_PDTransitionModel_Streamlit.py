@@ -28,7 +28,7 @@ tabs = ["About", "Data Preview and Analysis", "Single Factor Model Optimization"
 page = st.sidebar.radio("Vasicek one-factor PD Transition Model", tabs)
 
 if page == "About":
-    image = Image.open("ttcpdtopitpd.jpg")
+    image = Image.open("Dashboard/ttcpdtopitpd.jpg")
     st.image(image, width=700)
     st.header("About")
     st.write("This interface is designed for a quick implementation to transform TTC PDs to PIT PDs using the Vasicek one-factor model.")
